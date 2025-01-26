@@ -19,11 +19,36 @@ extern "C"
 {
 #endif
 
+    /**
+     * @brief Initialize button
+     * @param gpio GPIO pin number array
+     */
     void m5s_button_init(uint8_t* gpio);
 
+    /**
+     * @brief Update button state in non-blocking mode
+     */
     void m5s_button_update(void);
 
-    bool m5s_button_get_state(uint8_t button);
+    /**
+     * @brief Get button state
+     * @param index Button index
+     */
+    bool m5s_button_is_pressed(uint8_t button);
+
+    /**
+     * @brief Get button timer in milliseconds
+     * @param index Button index
+     * @return Button timer in milliseconds
+     */
+    uint32_t m5s_button_get_timer_ms(uint8_t button);
+
+    /**
+     * @brief Get button timer in seconds
+     * @param index Button index
+     * @return Button timer in seconds
+     */
+    uint32_t m5s_button_get_timer_s(uint8_t button);
 
 #ifdef __cplusplus
 }

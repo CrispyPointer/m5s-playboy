@@ -39,37 +39,80 @@ void m5s_button_update(void)
 {
     for (int i = 0; i < BUTTON_NUM; i++)
     {
-        timer_reset_time(&button_data.timer[i]);
         button_data.state[i] = gpio_get_level(button_data.gpio[i]);
         if (button_data.state[i] != button_data.prev_state[i])
         {
-            if (timer_get_elapsed_time(button_data.state[i]) > button_data.debounce_delay)
+            if (timer_get_elapsed_time(button_data.timer[i]) > button_data.debounce_delay)
             {
                 button_data.prev_state[i] = button_data.state[i];
+                timer_reset_time(&button_data.timer[i]);
             }
         }
     }
 }
 
-bool m5s_button_get_state(uint8_t button)
+static bool m5s_button_is_valid(uint8_t index)
+{
+    return (index != BUTTON_A && index != BUTTON_B && index != BUTTON_C) ? false : true;
+}
+
+static uint8_t button_to_index(uint8_t button)
+{
+    uint8_t index = UINT8_MAX;
+    switch (button)
+    {
+    case BUTTON_A:
+        index = 0u;
+        break;
+    case BUTTON_B:
+        index = 1u;
+        break;
+    case BUTTON_C:
+        index = 2u;
+        break;
+    default:
+        // Do nothing
+        break;
+    }
+    return index;
+}
+
+static bool m5s_button_get_state(uint8_t index)
+{
+    assert(index < BUTTON_NUM);
+    return button_data.state[index] == 0u ? true : false;
+}
+
+bool m5s_button_is_pressed(uint8_t button)
 {
     bool state = false;
-    if (button == BUTTON_A)
+
+    if (m5s_button_is_valid(button))
     {
-        state = button_data.state[0u] == 0u ? true : false;
-    }
-    else if (button == BUTTON_B)
-    {
-        state = button_data.state[1u] == 0u ? true : false;
-    }
-    else if (button == BUTTON_C)
-    {
-        state = button_data.state[2u] == 0u ? true : false;
-    }
-    else
-    {
-        // Do nothing
+        state = m5s_button_get_state(button_to_index(button));
     }
 
     return state;
+}
+
+uint32_t m5s_button_get_timer_ms(uint8_t button)
+{
+    uint32_t ret = 0u;
+    if (m5s_button_is_valid(button))
+    {
+        ret = timer_get_elapsed_time(button_data.timer[button_to_index(button)]);
+    }
+
+    return ret;
+}
+
+uint32_t m5s_button_get_timer_s(uint8_t button)
+{
+    uint32_t ret = 0u;
+    if (m5s_button_is_valid(button))
+    {
+        ret = timer_get_elapsed_time(button_data.timer[button_to_index(button)]) / 1000u; // Convert to seconds
+    }
+    
+    return ret;
 }
