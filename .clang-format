@@ -1,0 +1,73 @@
+#------------------------------------------------------------------------------
+# For clang-format configuration options see:
+#   https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+#
+# For online clang-format validation/configuration go to:
+#   https://zed0.co.uk/clang-format-configurator/
+#
+# For reformatting the whole source tree, use :
+#   'python tools\run-clang-format.py -i'
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# The basic style is based on Microsoft
+#------------------------------------------------------------------------------
+BasedOnStyle: Microsoft
+
+#------------------------------------------------------------------------------
+# The limit of a coding or comment line
+#------------------------------------------------------------------------------
+ColumnLimit: 200
+
+#------------------------------------------------------------------------------
+# use 'type* variable'
+#------------------------------------------------------------------------------
+PointerAlignment: Left
+
+#------------------------------------------------------------------------------
+# Tab's are never used, always 4 spaces
+#------------------------------------------------------------------------------
+UseTab: Never
+
+#------------------------------------------------------------------------------
+# Currently the includes are not sorted (for safety, maybe later on)
+#------------------------------------------------------------------------------
+SortIncludes: Never
+
+#------------------------------------------------------------------------------
+# The order of include sorting (active when SortIncludes is enabled)
+#------------------------------------------------------------------------------
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:           '^<ext/.*\.h>'
+    Priority:        2
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '^<.*\.h>'
+    Priority:        1
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '^<.*'
+    Priority:        2
+    SortPriority:    0
+    CaseSensitive:   false
+  - Regex:           '.*'
+    Priority:        3
+    SortPriority:    0
+    CaseSensitive:   false
+
+#------------------------------------------------------------------------------
+# Use of braces is mandatory, if forgotten add them
+#------------------------------------------------------------------------------
+InsertBraces: true
+
+#------------------------------------------------------------------------------
+# Do not change comments like '//lint' into '// lint', because PC-Lint
+# is not able to handle these.
+#------------------------------------------------------------------------------
+CommentPragmas:  '^[^ ]'
+
+#------------------------------------------------------------------------------
+# Try to align macro definitions
+#------------------------------------------------------------------------------
+AlignConsecutiveMacros: Consecutive
