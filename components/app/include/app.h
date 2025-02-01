@@ -1,8 +1,6 @@
 #ifndef APP_H
 #define APP_H
 
-#define MENU_ITEM_NUM 5
-
 typedef enum
 {
     UNKNOWN_PAGE = 0,
@@ -21,11 +19,15 @@ typedef enum
     EXIT = 4,
 } MENU_ITEM_T;
 
-typedef struct
+#ifdef __cplusplus
+extern "C"
 {
-    PAGE_T page;
-    uint8_t menu_index;
-    const char *menu_items[5];
-} APP_DATA_T;
+#endif // __cplusplus
+
+void app_task_init(void);
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // APP_H

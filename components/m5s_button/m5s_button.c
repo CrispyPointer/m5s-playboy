@@ -1,6 +1,13 @@
+#include <stdbool.h>
 #include <stdio.h>
-#include "m5s_button.h"
+#include <stdint.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_freertos_hooks.h"
+#include "freertos/semphr.h"
+#include "esp_system.h"
 
+#include "m5s_button.h"
 #include "tiny_timer.h"
 #include "driver/gpio.h"
 
@@ -35,19 +42,26 @@ void m5s_button_init(uint8_t* gpio)
 }
 
 /** Update button state in non-blocking mode */
-void m5s_button_update(void)
+static void m5s_button_update(void)
 {
-    for (int i = 0; i < BUTTON_NUM; i++)
+    while (true)
     {
-        button_data.state[i] = gpio_get_level(button_data.gpio[i]);
-        if (button_data.state[i] != button_data.prev_state[i])
+        for (int i = 0; i < BUTTON_NUM; i++)
         {
-            if (timer_get_elapsed_time(button_data.timer[i]) > button_data.debounce_delay)
+            button_data.state[i] = gpio_get_level(button_data.gpio[i]);
+            if (button_data.state[i] != button_data.prev_state[i])
             {
-                button_data.prev_state[i] = button_data.state[i];
-                timer_reset_time(&button_data.timer[i]);
+                button_data.changed = false;
+                if (timer_get_elapsed_time(button_data.timer[i]) > button_data.debounce_delay)
+                {
+                    button_data.changed = true;
+                    button_data.prev_state[i] = button_data.state[i];
+                    timer_reset_time(&button_data.timer[i]);
+                }
             }
         }
+
+        vTaskDelay(10 / portTICK_PERIOD_MS);
     }
 }
 
@@ -77,42 +91,49 @@ static uint8_t button_to_index(uint8_t button)
     return index;
 }
 
+static bool m5s_button_get_past_state(uint8_t index)
+{
+    assert(index < BUTTON_NUM);
+
+    if (button_data.changed)
+    {
+        return button_data.state[index] == 0u ? false : true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 static bool m5s_button_get_state(uint8_t index)
 {
     assert(index < BUTTON_NUM);
     return button_data.state[index] == 0u ? true : false;
 }
 
-bool m5s_button_is_pressed(uint8_t button)
+bool m5s_button_is_pressed(uint8_t index)
 {
-    bool state = false;
-
-    if (m5s_button_is_valid(button))
-    {
-        state = m5s_button_get_state(button_to_index(button));
-    }
-
-    return state;
+    return m5s_button_get_state(index);
 }
 
-uint32_t m5s_button_get_timer_ms(uint8_t button)
+bool m5s_button_was_pressed(uint8_t index)
 {
-    uint32_t ret = 0u;
-    if (m5s_button_is_valid(button))
-    {
-        ret = timer_get_elapsed_time(button_data.timer[button_to_index(button)]);
-    }
-
-    return ret;
+    return m5s_button_get_past_state(index);
 }
 
-uint32_t m5s_button_get_timer_s(uint8_t button)
+uint32_t m5s_button_get_timer_ms(uint8_t index)
 {
-    uint32_t ret = 0u;
-    if (m5s_button_is_valid(button))
-    {
-        ret = timer_get_elapsed_time(button_data.timer[button_to_index(button)]) / 1000u; // Convert to seconds
-    }
-    
-    return ret;
+    return timer_get_elapsed_time(button_data.timer[index]);
+}
+
+uint32_t m5s_button_get_timer_s(uint8_t index)
+{
+    return timer_get_elapsed_time(button_data.timer[index]) / 1000u; // Convert to seconds
+}
+
+void m5s_button_task_init(void)
+{
+    uint8_t gpio[BUTTON_NUM] = {BUTTON_A, BUTTON_B, BUTTON_C};
+    m5s_button_init(gpio);
+    xTaskCreate((TaskFunction_t)m5s_button_update, "m5s_button_init", 1024, NULL, 3, NULL);
 }
