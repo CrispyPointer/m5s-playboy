@@ -2,19 +2,15 @@
 #define DISAPLAY_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-void display_draw_menu(const char* menu_items[], int menu_size, int menu_index);
 
-void display_print(const char* string);
+    void display_draw_menu(const char* menu_items[], int menu_size, int menu_index);
 
-void display_set_cursor(int x, int y);
+    void display_draw_device(uint32_t soc, uint32_t volt, uint32_t curr);
 
-void display_update(void);
-
-void display_clear(void);
-
-void display_init(void);
+    void display_init(void);
 
 #ifdef __cplusplus
 }

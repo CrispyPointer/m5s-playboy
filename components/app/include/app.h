@@ -4,19 +4,18 @@
 typedef enum
 {
     UNKNOWN_PAGE = 0,
-    MAIN_MENU = 1,
-    NEW_GAME_MENU = 2,
-    LOAD_GAME_MENU = 3,
-    SETTINGS_MENU = 4,
+    MENU_PAGE = 1,
+    NEW_GAME_PAGE = 2,
+    DEVICE_PAGE = 3,
+    SETTINGS_PAGE = 4,
 } PAGE_T;
 
 typedef enum
 {
-    UNKNOWN = 0,
-    NEW_GAME = 1,
-    LOAD_GAME = 2,
-    SETTINGS = 3,
-    EXIT = 4,
+    NEW_GAME = 0,
+    DEVICE,
+    SETTINGS,
+    EXIT,
 } MENU_ITEM_T;
 
 #ifdef __cplusplus
@@ -24,7 +23,7 @@ extern "C"
 {
 #endif // __cplusplus
 
-void app_task_init(void);
+    void app_task_init(void);
 
 #ifdef __cplusplus
 }

@@ -13,9 +13,11 @@
 #include "defines.h"
 #include "m5s_button.h"
 #include "display.h"
+#include "power.h"
 
 typedef struct
 {
+    bool page_switched;
     PAGE_T page;
     uint8_t menu_index;
     const char* menu_items[MENU_ITEM_NUM];
@@ -26,7 +28,7 @@ typedef struct
 APP_DATA_T app_data = {
     .page = UNKNOWN_PAGE,
     .menu_index = 0u,
-    .menu_items = {"New game", "Load", "Settings", "Exit"},
+    .menu_items = {"New game", "Device", "Settings", "Exit"},
 };
 
 static void app_menu_display(uint8_t menu_index)
@@ -36,15 +38,22 @@ static void app_menu_display(uint8_t menu_index)
 
 static void app_init(void)
 {
-    app_data.page = MAIN_MENU;
+    app_data.page = MENU_PAGE;
     display_init();
     app_menu_display(app_data.menu_index);
+}
+
+static void app_device_display(void)
+{
+    const uint32_t soc = power_get_batt_soc();
+    display_draw_device(soc, 0u, 0u);
 }
 
 static void app_handle_button_menu(void)
 {
     static bool btn_a_cache, btn_b_cache, btn_c_cache;
-    if (app_data.btn_pressed[BUTTON_A_INDEX] && !btn_a_cache)
+
+    if (app_data.btn_pressed[BUTTON_A_INDEX] && !btn_a_cache && !app_data.page_switched)
     {
         // Move down the menu
         if (app_data.menu_index < (MENU_ITEM_NUM - 1u))
@@ -56,6 +65,7 @@ static void app_handle_button_menu(void)
     else if (app_data.btn_past_pressed[BUTTON_A_INDEX])
     {
         btn_a_cache = false;
+        app_data.page_switched = false; // Reset page switch flag otherwise it will be stuck in this index
     }
 
     if (app_data.btn_pressed[BUTTON_B_INDEX] && !btn_b_cache)
@@ -71,28 +81,27 @@ static void app_handle_button_menu(void)
     {
         btn_b_cache = false;
     }
-    
+
     if (app_data.btn_pressed[BUTTON_C_INDEX] && !btn_c_cache)
     {
         // Change page index
         switch (app_data.menu_index)
         {
-        case NEW_GAME:
-            app_data.page = NEW_GAME_MENU;
-            break;
-        case LOAD_GAME:
-            app_data.page = LOAD_GAME_MENU;
-            break;
-        case SETTINGS:
-            app_data.page = SETTINGS_MENU;
-            break;
-        case EXIT:
-            app_data.page = UNKNOWN_PAGE;
+        case DEVICE:
+            app_data.page = DEVICE_PAGE;
+            app_data.page_switched = true;
             break;
         default:
-            app_data.page = UNKNOWN_PAGE;
             break;
         }
+    }
+}
+
+static void app_handle_button_device(void)
+{
+    if (app_data.btn_pressed[BUTTON_A_INDEX])
+    {
+        app_data.page = MENU_PAGE;
     }
 }
 
@@ -111,18 +120,19 @@ static void app_handle_page(PAGE_T page)
 
     switch (page)
     {
-    case MAIN_MENU:
+    case MENU_PAGE:
         app_handle_button_menu();
         app_menu_display(app_data.menu_index);
         break;
-    case NEW_GAME_MENU:
-        // Handle new game menu
+    case NEW_GAME_PAGE:
+        // Handle new game page
         break;
-    case LOAD_GAME_MENU:
-        // Handle load game menu
+    case DEVICE_PAGE:
+        app_handle_button_device();
+        app_device_display();
         break;
-    case SETTINGS_MENU:
-        // Handle settings menu
+    case SETTINGS_PAGE:
+        // Handle settings page
         break;
     case UNKNOWN_PAGE:
         // Handle unknown page
