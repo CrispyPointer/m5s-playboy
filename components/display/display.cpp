@@ -74,7 +74,7 @@ static void display_setup_device_frame(uint32_t soc)
     /** Draw battery frame -- horizontally */
     sprite.drawRect(15, 80, 200, 100, WHITE);              // Draw battery main body
     sprite.fillRect(215, 105, 25, 50, WHITE);              // Draw battery tip
-    sprite.fillRect(20, 85, 190 * (soc / 100), 90, GREEN); // Draw battery level
+    sprite.fillRect(20, 85, 190 * (soc / 100.0f), 90, GREEN); // Draw battery level
 
     // Draw exit button
     sprite.fillRect(55, 215, 20, 5, WHITE);                // button body (rectangle)
