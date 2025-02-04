@@ -20,6 +20,7 @@
 #include "M5Unified.h"
 #include "m5s_button.h"
 #include "display.h"
+#include "tetris.h"
 
 extern "C" void app_main(void)
 {
@@ -28,4 +29,5 @@ extern "C" void app_main(void)
 
     m5s_button_task_init();
     app_task_init();
+    tetris_app_init();
 }

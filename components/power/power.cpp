@@ -18,3 +18,8 @@ extern "C" uint32_t power_get_batt_soc(void)
 {
     return M5.Power.getBatteryLevel();
 }
+
+extern "C" void power_shut_down(void)
+{
+    return M5.Power.powerOff();
+}

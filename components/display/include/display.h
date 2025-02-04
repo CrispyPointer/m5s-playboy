@@ -10,6 +10,12 @@ extern "C"
 
     void display_draw_device(uint32_t soc, uint32_t volt, uint32_t curr);
 
+    void display_tetris_set_bg(const uint8_t* data);
+
+    void display_tetris_draw(const uint8_t* data);
+    
+    void display_tetris_clear(void);
+
     void display_init(void);
 
 #ifdef __cplusplus
